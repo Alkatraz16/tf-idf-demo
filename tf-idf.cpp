@@ -40,3 +40,102 @@ double calculateIDF(
         static_cast<double>(totalDocuments) / documentsContainingWord
     );
 }
+int main(){
+
+    std::vector<std::string> documents =
+    {
+        "cat dog cat",
+        "dog mouse dog",
+        "cat mouse"
+    };
+    std::vector<std::unordered_map<std::string, int>> wordCounts;
+
+    for (const std::string& document : documents)
+    {
+        std::unordered_map<std::string, int> counts;
+        std::string word;
+
+        for (char c : document)
+        {
+            if (c == ' ')
+            {
+                if (!word.empty())
+                {
+                    counts[word]++;
+                    word.clear();
+                }
+            }
+            else
+            {
+                word += c;
+            }
+        }
+
+        if (!word.empty())
+        {
+            counts[word]++;
+        }
+
+        wordCounts.push_back(counts);
+    }
+
+    //Calculate TF-IDF for two words
+    std::string word1 = "cat";
+    std::string word2 = "dog";
+
+    int totalWords = 3;
+
+    //Word 1
+    double tf1 = calculateTF(
+        wordCounts[0],
+        word1,
+        totalWords
+    );
+
+    double idf1 = calculateIDF(
+        wordCounts,
+        word1
+    );
+
+    double tfidf1 = tf1 * idf1;
+
+    std::cout << "Word: " << word1 << '\n';
+    std::cout << "TF: " << tf1 << '\n';
+    std::cout << "IDF: " << idf1 << '\n';
+    std::cout << "TF-IDF: " << tfidf1 << "\n\n";
+
+    //Word 2
+    double tf2 = calculateTF(
+        wordCounts[0],
+        word2,
+        totalWords
+    );
+
+    double idf2 = calculateIDF(
+        wordCounts,
+        word2
+    );
+
+    double tfidf2 = tf2 * idf2;
+
+    std::cout << "Word: " << word2 << '\n';
+    std::cout << "TF: " << tf2 << '\n';
+    std::cout << "IDF: " << idf2 << '\n';
+    std::cout << "TF-IDF: " << tfidf2 << "\n\n";
+
+    //Comparison
+    std::cout << "Comparison:\n";
+
+    if (tfidf1 > tfidf2)
+    {
+        std::cout << word1 << " has the higher TF-IDF.\n";
+    }
+    else if (tfidf2 > tfidf1)
+    {
+        std::cout << word2 << " has the higher TF-IDF.\n";
+    }
+    else
+    {
+        std::cout << "Both words have the same TF-IDF.\n";
+    }
+}

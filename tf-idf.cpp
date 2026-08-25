@@ -139,3 +139,11 @@ int main(){
         std::cout << "Both words have the same TF-IDF.\n";
     }
 }
+
+//future improvements: 
+//show documents first
+//show word-frequency table
+//show document frequency
+//show actual formulas
+//add common word
+//maybe let user choose document

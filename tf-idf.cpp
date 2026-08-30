@@ -4,6 +4,7 @@
 #include <unordered_map>
 #include <cmath>
 #include <cctype>
+#include <algorithm>
 
 double calculateTF(
     const std::unordered_map<std::string, int>& wordCount,
@@ -146,8 +147,7 @@ std::cin >> query;
 for (auto& c : query)
     c = std::tolower(static_cast<unsigned char>(c));
 
-double bestScore = 0.0;
-int bestDocument = -1;
+std::vector<SearchResult> results;
 
 for (int i = 0; i < wordCounts.size(); i++)
 {
@@ -182,27 +182,54 @@ for (int i = 0; i < wordCounts.size(); i++)
 
     double tfidf = tf * idf;
 
+    results.push_back({
+    i,
+    matchedWord,
+    tfidf
+    });
+
     std::cout << "\nDocument " << i + 1 << "\n";
     std::cout << "Matched word: " << matchedWord << "\n";
     std::cout << "TF-IDF: " << tfidf << "\n";
-    std::cout << documents[i] << "\n";
+    std::cout << documents[i] << "\n"; 
 
-    if (tfidf > bestScore)
+std::sort(
+    results.begin(),
+    results.end(),
+    [](const SearchResult& a, const SearchResult& b)
     {
-        bestScore = tfidf;
-        bestDocument = i;
+        return a.tfidf > b.tfidf;
     }
-}
+);
 
-if (bestDocument != -1)
-{
-    std::cout << "\nMost relevant result:\n";
-    std::cout << documents[bestDocument] << "\n";
-}
-else
+if (results.empty())
 {
     std::cout << "No matching documents found.\n";
 }
+else
+{
+    std::cout << "\nSearch Results:\n";
+
+    for (const SearchResult& result : results)
+    {
+        std::cout << "\nDocument "
+                  << result.documentIndex + 1 << "\n";
+
+        std::cout << "Matched word: "
+                  << result.matchedWord << "\n";
+
+        std::cout << "TF-IDF: "
+                  << result.tfidf << "\n";
+
+        std::cout << documents[result.documentIndex]
+                  << "\n";
+    }
+
+    std::cout << "\nMost relevant result:\n";
+    std::cout << documents[results[0].documentIndex]
+              << "\n";
+}
+
 
 return 0;
 }

@@ -43,11 +43,16 @@ double calculateIDF(
 int main(){
 
     std::vector<std::string> documents =
-    {
-        "cat dog cat",
-        "dog mouse dog",
-        "cat mouse"
-    };
+{
+    "Cats are domesticated mammals that are often kept as pets. "
+    "They are known for their independence and hunting abilities.",
+
+    "Bananas are edible fruits produced by several kinds of large "
+    "herbaceous flowering plants. They are commonly eaten as snacks.",
+
+    "Dogs are domesticated mammals and are commonly kept as pets. "
+    "They are known for their loyalty and social behavior."
+};
     std::vector<std::unordered_map<std::string, int>> wordCounts;
 
     for (const std::string& document : documents)

@@ -143,6 +143,11 @@ int main(){
     {
         std::cout << "Both words have the same TF-IDF.\n";
     }
+
+    std::string query;
+
+    std::cout << "Search: ";
+    std::cin >> query;
 }
 
 //future improvements: 

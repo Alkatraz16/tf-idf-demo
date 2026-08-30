@@ -13,7 +13,6 @@ double calculateTF(
     int totalWords)
 {
     auto it = wordCount.find(word);
-
     if (it == wordCount.end())
         return 0.0;
 
@@ -213,7 +212,7 @@ int main()
 
                 std::cout << "[<]  Search: "
                           << query
-                          << "\n";
+                          << "                                      [X]\n";
 
                 std::cout << "----------------------------------------------------\n";
 
@@ -228,8 +227,6 @@ int main()
 
                     double bestTF = 0.0;
                     double bestIDF = 0.0;
-
-                    bool foundMatch = false;
 
                     for (const auto& entry : wordCounts[i])
                     {
@@ -249,18 +246,16 @@ int main()
 
                         double tfidf = tf * idf;
 
-                        if (!foundMatch || tfidf > bestTFIDF)
+                        if (tfidf > bestTFIDF)
                         {
                             bestTFIDF = tfidf;
                             bestMatchedWord = entry.first;
                             bestTF = tf;
                             bestIDF = idf;
-
-                            foundMatch = true;
                         }
                     }
 
-                    if (!foundMatch)
+                    if (bestMatchedWord.empty())
                         continue;
 
                     results.push_back({

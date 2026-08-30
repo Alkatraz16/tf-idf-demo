@@ -151,47 +151,45 @@ std::vector<SearchResult> results;
 
 for (int i = 0; i < wordCounts.size(); i++)
 {
-    bool found = false;
-    std::string matchedWord;
+    int totalWords = countWords(wordCounts[i]);
+
+    double bestTFIDF = 0.0;
+    std::string bestMatchedWord;
 
     for (const auto& entry : wordCounts[i])
     {
-        if (startsWith(entry.first, query))
+        if (!startsWith(entry.first, query))
+            continue;
+
+        double tf = calculateTF(
+            wordCounts[i],
+            entry.first,
+            totalWords
+        );
+
+        double idf = calculateIDF(
+            wordCounts,
+            entry.first
+        );
+
+        double tfidf = tf * idf;
+
+        if (tfidf > bestTFIDF)
         {
-            found = true;
-            matchedWord = entry.first;
-            break;
+            bestTFIDF = tfidf;
+            bestMatchedWord = entry.first;
         }
     }
 
-    if (!found)
+    if (bestMatchedWord.empty())
         continue;
 
-    int totalWords = countWords(wordCounts[i]);
-
-    double tf = calculateTF(
-        wordCounts[i],
-        matchedWord,
-        totalWords
-    );
-
-    double idf = calculateIDF(
-        wordCounts,
-        matchedWord
-    );
-
-    double tfidf = tf * idf;
-
     results.push_back({
-    i,
-    matchedWord,
-    tfidf
+        i,
+        bestMatchedWord,
+        bestTFIDF
     });
-
-    std::cout << "\nDocument " << i + 1 << "\n";
-    std::cout << "Matched word: " << matchedWord << "\n";
-    std::cout << "TF-IDF: " << tfidf << "\n";
-    std::cout << documents[i] << "\n"; 
+}
 
 std::sort(
     results.begin(),
@@ -229,7 +227,6 @@ else
     std::cout << documents[results[0].documentIndex]
               << "\n";
 }
-
 
 return 0;
 }

@@ -148,6 +148,14 @@ int main(){
 
     std::cout << "Search: ";
     std::cin >> query;
+
+    for (const std::string& document : documents)
+{
+    if (document.find(query) != std::string::npos)
+    {
+        std::cout << document << "\n\n";
+    }
+}
 }
 
 //future improvements: 

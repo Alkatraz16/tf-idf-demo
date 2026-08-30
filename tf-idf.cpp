@@ -140,7 +140,8 @@ int bestDocument = -1;
 for (int i = 0; i < wordCounts.size(); i++)
 {
     bool found = false;
-
+    std::string matchedWord;
+    
     for (const auto& entry : wordCounts[i])
     {
         if (startsWith(entry.first, query))

@@ -53,6 +53,13 @@ int countWords(const std::unordered_map<std::string, int>& wordCount){
     return total;
 }
 
+struct SearchResult
+{
+    int documentIndex;
+    std::string matchedWord;
+    double tfidf;
+};
+
 int main()
 {
     std::vector<std::string> documents =

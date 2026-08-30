@@ -141,7 +141,8 @@ for (int i = 0; i < wordCounts.size(); i++)
 {
     bool found = false;
     std::string matchedWord;
-    
+
+
     for (const auto& entry : wordCounts[i])
     {
         if (startsWith(entry.first, query))
@@ -157,9 +158,9 @@ for (int i = 0; i < wordCounts.size(); i++)
     int totalWords = countWords(wordCounts[i]);
 
     double tf = calculateTF(
-        wordCounts[i],
-        query,
-        totalWords
+    wordCounts[i],
+    matchedWord,
+    totalWords
     );
 
     double idf = calculateIDF(

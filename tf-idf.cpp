@@ -118,17 +118,20 @@ int main()
     std::string query;
     std::cout << "Search: ";
     std::cin >> query;
+
     for (auto& c : query)
         c = std::tolower(static_cast<unsigned char>(c));
 
-    for (const std::string& document : documents)
+    for (int i = 0; i < wordCounts.size(); i++)
     {
-        std::string lowerDoc = document;
-        for (auto& c : lowerDoc)
-            c = std::tolower(static_cast<unsigned char>(c));
-
-        if (lowerDoc.find(query) != std::string::npos)
-            std::cout << document << "\n\n";
+        for (const auto& entry : wordCounts[i])
+        {
+            if (startsWith(entry.first, query))
+            {
+                std::cout << documents[i] << "\n\n";
+                break;
+            }
+        }
     }
 
     return 0;

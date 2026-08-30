@@ -96,22 +96,27 @@ for (const std::string& document : documents)
 }
 
 // Calculate TF-IDF for two words
+// Calculate TF-IDF for two words
+
 std::string word1 = "cats";
 std::string word2 = "dogs";
-int totalWords = 3;
 
-double tf1 = calculateTF(wordCounts[0], word1, totalWords);
+int totalWords1 = countWords(wordCounts[0]);
+int totalWords2 = countWords(wordCounts[2]);
+
+double tf1 = calculateTF(wordCounts[0], word1, totalWords1);
+double tf2 = calculateTF(wordCounts[2], word2, totalWords2);
+
 double idf1 = calculateIDF(wordCounts, word1);
+double idf2 = calculateIDF(wordCounts, word2);
+
 double tfidf1 = tf1 * idf1;
+double tfidf2 = tf2 * idf2;
 
 std::cout << "Word: " << word1 << '\n';
 std::cout << "TF: " << tf1 << '\n';
 std::cout << "IDF: " << idf1 << '\n';
 std::cout << "TF-IDF: " << tfidf1 << "\n\n";
-
-double tf2 = calculateTF(wordCounts[2], word2, totalWords);
-double idf2 = calculateIDF(wordCounts, word2);
-double tfidf2 = tf2 * idf2;
 
 std::cout << "Word: " << word2 << '\n';
 std::cout << "TF: " << tf2 << '\n';
@@ -142,12 +147,12 @@ for (int i = 0; i < wordCounts.size(); i++)
     bool found = false;
     std::string matchedWord;
 
-
     for (const auto& entry : wordCounts[i])
     {
         if (startsWith(entry.first, query))
         {
             found = true;
+            matchedWord = entry.first;
             break;
         }
     }
@@ -158,19 +163,20 @@ for (int i = 0; i < wordCounts.size(); i++)
     int totalWords = countWords(wordCounts[i]);
 
     double tf = calculateTF(
-    wordCounts[i],
-    matchedWord,
-    totalWords
+        wordCounts[i],
+        matchedWord,
+        totalWords
     );
 
     double idf = calculateIDF(
         wordCounts,
-        query
+        matchedWord
     );
 
     double tfidf = tf * idf;
 
     std::cout << "\nDocument " << i + 1 << "\n";
+    std::cout << "Matched word: " << matchedWord << "\n";
     std::cout << "TF-IDF: " << tfidf << "\n";
     std::cout << documents[i] << "\n";
 

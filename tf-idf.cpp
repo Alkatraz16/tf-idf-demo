@@ -127,25 +127,67 @@ else
     std::cout << "Both words have the same TF-IDF.\n";
 
 std::string query;
+
 std::cout << "Search: ";
 std::cin >> query;
 
 for (auto& c : query)
     c = std::tolower(static_cast<unsigned char>(c));
 
+double bestScore = 0.0;
+int bestDocument = -1;
+
 for (int i = 0; i < wordCounts.size(); i++)
 {
+    bool found = false;
+
     for (const auto& entry : wordCounts[i])
     {
         if (startsWith(entry.first, query))
         {
-            std::cout << documents[i] << "\n\n";
+            found = true;
             break;
         }
     }
+
+    if (!found)
+        continue;
+
+    int totalWords = countWords(wordCounts[i]);
+
+    double tf = calculateTF(
+        wordCounts[i],
+        query,
+        totalWords
+    );
+
+    double idf = calculateIDF(
+        wordCounts,
+        query
+    );
+
+    double tfidf = tf * idf;
+
+    std::cout << "\nDocument " << i + 1 << "\n";
+    std::cout << "TF-IDF: " << tfidf << "\n";
+    std::cout << documents[i] << "\n";
+
+    if (tfidf > bestScore)
+    {
+        bestScore = tfidf;
+        bestDocument = i;
+    }
 }
 
-
+if (bestDocument != -1)
+{
+    std::cout << "\nMost relevant result:\n";
+    std::cout << documents[bestDocument] << "\n";
+}
+else
+{
+    std::cout << "No matching documents found.\n";
+}
 
 return 0;
 }

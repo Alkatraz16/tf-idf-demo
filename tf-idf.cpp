@@ -211,19 +211,23 @@ else
     for (const SearchResult& result : results)
     {
         std::cout << "\nDocument "
-                  << result.documentIndex + 1 << "\n";
+                  << result.documentIndex + 1
+                  << "\n";
 
         std::cout << "Matched word: "
-                  << result.matchedWord << "\n";
+                  << result.matchedWord
+                  << "\n";
 
         std::cout << "TF-IDF: "
-                  << result.tfidf << "\n";
+                  << result.tfidf
+                  << "\n";
 
         std::cout << documents[result.documentIndex]
                   << "\n";
     }
 
     std::cout << "\nMost relevant result:\n";
+
     std::cout << documents[results[0].documentIndex]
               << "\n";
 }

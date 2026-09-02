@@ -7,17 +7,26 @@
 #include <algorithm>
 #include <conio.h>
 
+// =CALCULATE TF=
+// TF tells us how often a word appears in one document.
+// Formula: number of times the word appears / total words.
+
 double calculateTF(
     const std::unordered_map<std::string, int>& wordCount,
     const std::string& word,
     int totalWords)
 {
     auto it = wordCount.find(word);
+
     if (it == wordCount.end())
         return 0.0;
 
     return static_cast<double>(it->second) / totalWords;
 }
+
+// =CALCULATE IDF=
+// IDF tells us how rare or common a word is across all documents.
+// A word found in many documents gets a lower IDF.
 
 double calculateIDF(
     const std::vector<std::unordered_map<std::string, int>>& documents,
@@ -26,6 +35,7 @@ double calculateIDF(
     int totalDocuments = documents.size();
     int documentsContainingWord = 0;
 
+    // Count how many documents contain the word
     for (const auto& document : documents)
     {
         if (document.find(word) != document.end())
@@ -35,10 +45,12 @@ double calculateIDF(
     if (documentsContainingWord == 0)
         return 0.0;
 
-    return std::log10(
-        static_cast<double>(totalDocuments) / documentsContainingWord
-    );
+    return std::log10(static_cast<double>(totalDocuments) / documentsContainingWord);
 }
+
+// =CHECK WORD MATCH=
+// Allows the user to search using part of a word.
+// Example: "cat" can match "cats".
 
 bool startsWith(const std::string& word, const std::string& query)
 {
@@ -47,6 +59,10 @@ bool startsWith(const std::string& word, const std::string& query)
 
     return word.compare(0, query.length(), query) == 0;
 }
+
+// =COUNT TOTAL WORDS=
+// Gets the total number of words in one document.
+// This is needed when calculating TF.
 
 int countWords(const std::unordered_map<std::string, int>& wordCount)
 {
@@ -60,6 +76,9 @@ int countWords(const std::unordered_map<std::string, int>& wordCount)
     return total;
 }
 
+// =SEARCH RESULT=
+// Stores the information needed to display and rank a result.
+
 struct SearchResult
 {
     int documentIndex;
@@ -71,6 +90,8 @@ struct SearchResult
 
 int main()
 {
+    // =DOCUMENTS=
+
     std::vector<std::string> documents =
     {
         "Cats are domesticated mammals that are often kept as pets. "
@@ -92,6 +113,7 @@ int main()
         std::unordered_map<std::string, int> counts;
         std::string word;
 
+        // Separate each document into individual words
         for (char c : document)
         {
             if (c == ' ' || std::ispunct(static_cast<unsigned char>(c)))
@@ -104,9 +126,8 @@ int main()
             }
             else
             {
-                word += std::tolower(
-                    static_cast<unsigned char>(c)
-                );
+                // Convert letters to lowercase
+                word += std::tolower(static_cast<unsigned char>(c));
             }
         }
 
@@ -152,7 +173,7 @@ int main()
             break;
         }
 
-        // =VIEW ALL DOCUMENTS=
+        // =VIEW DOCUMENTS=
 
         if (choice == '1')
         {
@@ -210,14 +231,12 @@ int main()
                 std::cout << "                  MINI SEARCH ENGINE               \n";
                 std::cout << "====================================================\n\n";
 
-                std::cout << "[<]  Search: "
-                          << query
-                          << "                                      [X]\n";
-
+                std::cout << "[<]  Search: " << query << "\n";
                 std::cout << "----------------------------------------------------\n";
 
                 std::vector<SearchResult> results;
 
+                // Check every document for the searched word
                 for (int i = 0; i < wordCounts.size(); i++)
                 {
                     int totalWords = countWords(wordCounts[i]);
@@ -228,34 +247,33 @@ int main()
                     double bestTF = 0.0;
                     double bestIDF = 0.0;
 
+                    // Separates "not found" from a TF-IDF score of 0
+                    bool foundMatch = false;
+
                     for (const auto& entry : wordCounts[i])
                     {
                         if (!startsWith(entry.first, query))
                             continue;
 
-                        double tf = calculateTF(
-                            wordCounts[i],
-                            entry.first,
-                            totalWords
-                        );
+                        // =TF-IDF CALCULATION=
 
-                        double idf = calculateIDF(
-                            wordCounts,
-                            entry.first
-                        );
-
+                        double tf = calculateTF(wordCounts[i], entry.first, totalWords);
+                        double idf = calculateIDF(wordCounts, entry.first);
                         double tfidf = tf * idf;
 
-                        if (tfidf > bestTFIDF)
+                        // Keep the matching word with the highest TF-IDF
+                        if (!foundMatch || tfidf > bestTFIDF)
                         {
                             bestTFIDF = tfidf;
                             bestMatchedWord = entry.first;
                             bestTF = tf;
                             bestIDF = idf;
+
+                            foundMatch = true;
                         }
                     }
 
-                    if (bestMatchedWord.empty())
+                    if (!foundMatch)
                         continue;
 
                     results.push_back({
@@ -266,6 +284,9 @@ int main()
                         bestTFIDF
                     });
                 }
+
+                // =RANK RESULTS=
+                // Highest TF-IDF is placed first.
 
                 std::sort(
                     results.begin(),
@@ -291,9 +312,7 @@ int main()
                 else
                 {
                     std::cout << "\n";
-                    std::cout << "Search Results for: "
-                              << query
-                              << "\n\n";
+                    std::cout << "Search Results for: " << query << "\n\n";
 
                     for (int i = 0; i < results.size(); i++)
                     {
@@ -305,32 +324,17 @@ int main()
                         }
                         else
                         {
-                            std::cout << "RESULT "
-                                      << i + 1
-                                      << "\n";
+                            std::cout << "RESULT " << i + 1 << "\n";
                         }
 
                         std::cout << "\n";
+                        std::cout << documents[result.documentIndex] << "\n\n";
 
-                        std::cout << documents[
-                            result.documentIndex
-                        ] << "\n\n";
-
-                        std::cout << "Matched word: "
-                                  << result.matchedWord
-                                  << '\n';
-
-                        std::cout << "TF: "
-                                  << result.tf
-                                  << '\n';
-
-                        std::cout << "IDF: "
-                                  << result.idf
-                                  << '\n';
-
-                        std::cout << "TF-IDF: "
-                                  << result.tfidf
-                                  << "\n\n";
+                        // Show the values used to rank the result
+                        std::cout << "Matched word: " << result.matchedWord << '\n';
+                        std::cout << "TF: " << result.tf << '\n';
+                        std::cout << "IDF: " << result.idf << '\n';
+                        std::cout << "TF-IDF: " << result.tfidf << "\n\n";
 
                         if (i < results.size() - 1)
                         {
@@ -364,18 +368,15 @@ int main()
                     return 0;
                 }
 
+                // Backspace removes the last character
                 if (key == 8)
                 {
                     if (!query.empty())
                         query.pop_back();
                 }
-                else if (
-                    std::isalpha(
-                        static_cast<unsigned char>(key)))
+                else if (std::isalpha(static_cast<unsigned char>(key)))
                 {
-                    query += std::tolower(
-                        static_cast<unsigned char>(key)
-                    );
+                    query += std::tolower(static_cast<unsigned char>(key));
                 }
             }
 

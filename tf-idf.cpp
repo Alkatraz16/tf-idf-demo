@@ -7,6 +7,10 @@
 #include <algorithm>
 #include <conio.h>
 
+// =CALCULATE TF=
+// TF tells us how often a word appears in one document.
+// Formula: number of times the word appears / total words.
+
 double calculateTF(
     const std::unordered_map<std::string, int>& wordCount,
     const std::string& word,
@@ -20,6 +24,11 @@ double calculateTF(
     return static_cast<double>(it->second) / totalWords;
 }
 
+
+// =CALCULATE IDF=
+// IDF tells us how rare or common a word is across all documents.
+// A word found in many documents gets a lower IDF.
+
 double calculateIDF(
     const std::vector<std::unordered_map<std::string, int>>& documents,
     const std::string& word)
@@ -27,6 +36,7 @@ double calculateIDF(
     int totalDocuments = documents.size();
     int documentsContainingWord = 0;
 
+    // Count how many documents contain the word
     for (const auto& document : documents)
     {
         if (document.find(word) != document.end())
@@ -41,6 +51,11 @@ double calculateIDF(
     );
 }
 
+
+// =CHECK WORD MATCH=
+// Allows the user to search using part of a word.
+// Example: "cat" can match "cats".
+
 bool startsWith(const std::string& word, const std::string& query)
 {
     if (query.length() > word.length())
@@ -48,6 +63,11 @@ bool startsWith(const std::string& word, const std::string& query)
 
     return word.compare(0, query.length(), query) == 0;
 }
+
+
+// =COUNT TOTAL WORDS=
+// Gets the total number of words in one document.
+// This is needed when calculating TF.
 
 int countWords(const std::unordered_map<std::string, int>& wordCount)
 {
@@ -61,6 +81,10 @@ int countWords(const std::unordered_map<std::string, int>& wordCount)
     return total;
 }
 
+
+// =SEARCH RESULT=
+// Stores the information needed to display and rank a result.
+
 struct SearchResult
 {
     int documentIndex;
@@ -70,8 +94,11 @@ struct SearchResult
     double tfidf;
 };
 
+
 int main()
 {
+    // =DOCUMENTS=
+
     std::vector<std::string> documents =
     {
         "Cats are domesticated mammals that are often kept as pets. "
@@ -84,6 +111,7 @@ int main()
         "They are known for their loyalty and social behavior."
     };
 
+
     // =WORD COUNTS=
 
     std::vector<std::unordered_map<std::string, int>> wordCounts;
@@ -93,6 +121,7 @@ int main()
         std::unordered_map<std::string, int> counts;
         std::string word;
 
+        // Separate each document into individual words
         for (char c : document)
         {
             if (c == ' ' || std::ispunct(static_cast<unsigned char>(c)))
@@ -105,9 +134,8 @@ int main()
             }
             else
             {
-                word += std::tolower(
-                    static_cast<unsigned char>(c)
-                );
+                // Convert letters to lowercase
+                word += std::tolower(static_cast<unsigned char>(c));
             }
         }
 
@@ -116,6 +144,7 @@ int main()
 
         wordCounts.push_back(counts);
     }
+
 
     // =MAIN MENU=
 
@@ -134,14 +163,15 @@ int main()
         std::cout << "  3   Exit\n\n";
 
         std::cout << "----------------------------------------------------\n";
-        std::cout << "[ Search ]: ";
+        std::cout << "[ CHOOSE 1-3 ]: ";
 
         char choice;
         std::cin >> choice;
 
+
         // =EXIT=
 
-        if (choice == '3' || choice == 'x' || choice == 'X')
+        if (choice == '3')
         {
             system("cls");
 
@@ -153,7 +183,8 @@ int main()
             break;
         }
 
-        // =VIEW ALL DOCUMENTS=
+
+        // =VIEW DOCUMENTS=
 
         if (choice == '1')
         {
@@ -173,14 +204,20 @@ int main()
                 }
 
                 std::cout << "----------------------------------------------------\n";
-                std::cout << "[B] Back to Main Menu     [X] Exit\n";
+                std::cout << "[0] Back     [3] Exit\n";
 
                 char key = _getch();
 
-                if (key == 'b' || key == 'B')
-                    break;
 
-                if (key == 'x' || key == 'X')
+                // Press 0 to go back to the main menu
+                if (key == '0')
+                {
+                    break;
+                }
+
+
+                // Press 3 to exit
+                if (key == '3')
                 {
                     system("cls");
 
@@ -193,8 +230,10 @@ int main()
                 }
             }
 
+            // Return to main menu
             continue;
         }
+
 
         // =SEARCH=
 
@@ -211,14 +250,13 @@ int main()
                 std::cout << "                  MINI SEARCH ENGINE               \n";
                 std::cout << "====================================================\n\n";
 
-                std::cout << "[<]  Search: "
-                          << query
-                          << "\n";
-
+                std::cout << "[<]  Search: " << query << "\n";
                 std::cout << "----------------------------------------------------\n";
 
                 std::vector<SearchResult> results;
 
+
+                // Check every document for the searched word
                 for (int i = 0; i < wordCounts.size(); i++)
                 {
                     int totalWords = countWords(wordCounts[i]);
@@ -229,12 +267,16 @@ int main()
                     double bestTF = 0.0;
                     double bestIDF = 0.0;
 
+                    // Separates "not found" from a TF-IDF score of 0
                     bool foundMatch = false;
 
                     for (const auto& entry : wordCounts[i])
                     {
                         if (!startsWith(entry.first, query))
                             continue;
+
+
+                        // =TF-IDF CALCULATION=
 
                         double tf = calculateTF(
                             wordCounts[i],
@@ -249,6 +291,8 @@ int main()
 
                         double tfidf = tf * idf;
 
+
+                        // Keep the matching word with the highest TF-IDF
                         if (!foundMatch || tfidf > bestTFIDF)
                         {
                             bestTFIDF = tfidf;
@@ -272,6 +316,10 @@ int main()
                     });
                 }
 
+
+                // =RANK RESULTS=
+                // Highest TF-IDF is placed first.
+
                 std::sort(
                     results.begin(),
                     results.end(),
@@ -280,6 +328,7 @@ int main()
                         return a.tfidf > b.tfidf;
                     }
                 );
+
 
                 // =SEARCH RESULTS=
 
@@ -296,9 +345,7 @@ int main()
                 else
                 {
                     std::cout << "\n";
-                    std::cout << "Search Results for: "
-                              << query
-                              << "\n\n";
+                    std::cout << "Search Results for: " << query << "\n\n";
 
                     for (int i = 0; i < results.size(); i++)
                     {
@@ -310,54 +357,51 @@ int main()
                         }
                         else
                         {
-                            std::cout << "RESULT "
-                                      << i + 1
-                                      << "\n";
+                            std::cout << "RESULT " << i + 1 << "\n";
                         }
 
                         std::cout << "\n";
+                        std::cout << documents[result.documentIndex] << "\n\n";
 
-                        std::cout << documents[
-                            result.documentIndex
-                        ] << "\n\n";
-
+                        // Show the values used to rank the result
                         std::cout << "Matched word: "
-                                  << result.matchedWord
-                                  << '\n';
+                                  << result.matchedWord << '\n';
 
-                        std::cout << "TF: "
-                                  << result.tf
-                                  << '\n';
-
-                        std::cout << "IDF: "
-                                  << result.idf
-                                  << '\n';
-
+                        std::cout << "TF: " << result.tf << '\n';
+                        std::cout << "IDF: " << result.idf << '\n';
                         std::cout << "TF-IDF: "
-                                  << result.tfidf
-                                  << "\n\n";
+                                  << result.tfidf << "\n\n";
 
                         if (i < results.size() - 1)
                         {
-                            std::cout << "....................................................\n\n";
+                            std::cout
+                                << "....................................................\n\n";
                         }
                     }
                 }
 
+
+                // =SEARCH NAVIGATION=
+
                 std::cout << "\n";
                 std::cout << "----------------------------------------------------\n";
-                std::cout << "[B] Back to Main Menu     [X] Exit\n";
+                std::cout << "[0] Back     [3] Exit\n";
+
 
                 // =SEARCH INPUT=
 
                 char key = _getch();
 
-                if (key == 'b' || key == 'B')
+
+                // Press 0 to return to the main menu
+                if (key == '0')
                 {
                     break;
                 }
 
-                if (key == 'x' || key == 'X')
+
+                // Press 3 to exit
+                if (key == '3')
                 {
                     system("cls");
 
@@ -369,14 +413,18 @@ int main()
                     return 0;
                 }
 
+
+                // Backspace removes the last character
                 if (key == 8)
                 {
                     if (!query.empty())
                         query.pop_back();
                 }
-                else if (
-                    std::isalpha(
-                        static_cast<unsigned char>(key)))
+
+
+                // Letters are added to the search query
+                else if (std::isalpha(
+                    static_cast<unsigned char>(key)))
                 {
                     query += std::tolower(
                         static_cast<unsigned char>(key)
@@ -384,8 +432,10 @@ int main()
                 }
             }
 
+            // Return to main menu
             continue;
         }
+
 
         // =INVALID INPUT=
 
